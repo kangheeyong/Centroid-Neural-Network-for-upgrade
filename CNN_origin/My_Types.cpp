@@ -8,26 +8,12 @@ using namespace std;
 
 void PR1_DATA :: init() //초기화
 {
-  srand(time(NULL));
   if(this->data != NULL) delete this->data;
   this->row = 0;
   this->column = 0;
   this->data = NULL;
-  if(this->t_table != NULL) delete this->t_table;
-  this->t_row = 0;
-  this->t_column = 0;
-  this->t_table = NULL; 
 }
    
-void PR1_DATA :: table_make()
-{
-  this->t_row = 2;
-  this->t_column = this->column;
-  this->t_table = new double[2*this->t_column];
-  for(int i = 0 ; i < 2*this->t_column ; i++) this->t_table[i] = 0.0;
-}
-
-
 void PR1_DATA :: init(int y)
 {
   this->init(y,1);
@@ -40,8 +26,6 @@ void PR1_DATA :: init(int y, int x)
   this->column = y;
   for(int i = 0 ; i < x*y ; i++) this->data[i] = 0.0;
   
-  this->table_make();
- 
 }
 void PR1_DATA :: print()
 {
@@ -93,6 +77,8 @@ void PR1_DATA :: random() //data 값의 랜덤
 }
 void PR1_DATA :: random(double min, double max)
 {
+  srand(time(NULL));
+
   int temp = (max - min) *100000;
 
   for(int i = 0 ; i < this->column ; i++)
@@ -128,54 +114,33 @@ void PR1_DATA :: suffle(int num) //data의 row단위로 섞는다.
   this->suffle();
 }
 
-void PR1_DATA :: table_init()
-{
-  if(this->data == NULL)
-  {
-    cout<<"data is empty"<<endl;
-  }
-  else
-  {
-    if(this->t_table != NULL) delete this->t_table;
-    this->t_row = 2;
-    this->t_column = this->column;
-    this->t_table = new double[2*this->t_column];
-    for(int i = 0 ; i < 2*this->t_column ; i++) this->t_table[i] = 0.0;
-  }
-}
-void PR1_DATA :: table_insert( int y, double value)
-{
-  this->t_table[y*2] = value;
-  this->t_table[y*2+1] = y;
-}
 
 void PR1_DATA :: Swap(double arr[], int idx1,int idx2)
 {
-  double t_value = arr[idx1*2];
-  double t_y = arr[idx1*2 + 1];
+  double *t_arr = new double[this->row];
 
-  arr[idx1*2] = arr[idx2*2];
-  arr[idx1*2+1] = arr[idx2*2+1];
-  
-  arr[idx2*2] = t_value;
-  arr[idx2*2+1] = t_y;
+  for(int i = 0; i < this->row ; i++) t_arr[i] = this->data[idx1*this->row + i];
+
+  for(int i = 0 ; i < this->row ; i++) this->data[idx1*this->row + i] = this->data[idx2*this->row + i];
+  for(int i = 0 ; i < this->row ; i++) this->data[idx2*this->row + i] = t_arr[i];
+  delete [] t_arr;
 }
 
-int PR1_DATA :: Partition(double arr[], int left, int right)
+int PR1_DATA :: Partition(double arr[], int left, int right,int x)
 {
-  double pivot = arr[left*2]; // 피벗의 위치는 가장 왼쪽!
+  double pivot = arr[left*this->row+1]; // 피벗의 위치는 가장 왼쪽!
   int low = left + 1;
   int high = right;
   
   while(low <= high) // 교차되지 않을 때까지 반복
   {
     //피벗보다 큰 값을 찾는 과정
-    while(pivot >= arr[low*2] && low <=right)
+    while(pivot >= arr[low*this->row+1] && low <=right)
     {
       low++;
     }
     //피벗보다 작은 값을 찾는 과정
-    while(pivot <= arr[high*2] && high >= (left + 1))
+    while(pivot <= arr[high*this->row+1] && high >= (left + 1))
     {
       high--;
     }
@@ -191,71 +156,21 @@ int PR1_DATA :: Partition(double arr[], int left, int right)
   return high;          //옮겨진 피벗의 위치정보 반환
 }
 
-void PR1_DATA :: QuickSort(double arr[], int left, int right)
+void PR1_DATA :: QuickSort(double arr[], int left, int right,int x)
 {
   if(left <= right)
   {
-    int point_pivot = Partition(arr,left,right);
-    QuickSort(arr,left,point_pivot-1);
-    QuickSort(arr,point_pivot+1, right);
+    int point_pivot = Partition(arr,left,right,x);
+    QuickSort(arr,left,point_pivot-1,x);
+    QuickSort(arr,point_pivot+1, right,x);
   }
 }
 
 
-void PR1_DATA :: table_ascending()
+void PR1_DATA :: ascending(int x)
 {
-  if(this->t_table != NULL)
-    this->QuickSort(this->t_table,0,this->t_column-1);
-}
-double PR1_DATA :: get_table(int y, int x)
-{
-  return this->t_table[y*2+x];
-}
-double PR1_DATA :: table(int ordered_y,int x)
-{
-  return this->data[ (int)(this->t_table[ordered_y*2 + 1]) * this->row + x];
-}
-void PR1_DATA :: table_print()
-{
-  if(this->t_table == NULL) cout<<"empty"<<endl;
-  else
-  {
-    cout<<endl;
-    cout<<"table => column : "<<this->t_column<<endl;
-
-    if(this->column < 21)
-    {
-      for(int i = 0 ; i < this->t_column ; i++)
-      {
-        for(int j = 0 ; j < 2 ; j++)
-        {
-          cout << this->t_table[i*2 + j]<<" ";
-        }
-        cout<<endl;
-      }
-    }
-    else
-    {
-      for(int i = 0 ; i < 10 ; i++)
-      {
-        for(int j = 0 ; j < 2 ; j++)
-        {
-          cout << this->t_table[i*2 + j]<<" ";
-        }
-        cout<<endl;
-      }
-      cout<<"..."<<endl;
-      for(int i = this->t_column-10 ; i < this->t_column ; i++)
-      {
-        for(int j = 0 ; j < 2 ; j++)
-        {
-          cout << this->t_table[i*2 + j]<<" ";
-        }
-        cout<<endl;
-      }
-    }
-    cout<<endl;
-  }
+  if(this->data != NULL)
+    this->QuickSort(this->data,0,this->column-1,x);
 }
 
 
@@ -306,7 +221,6 @@ bool PR1_DATA :: fread(const char* fname) //텍스트 읽기
        }
      }
      fclose(fp);
-     this->table_make();
      return 1;
    }
    else
@@ -315,29 +229,7 @@ bool PR1_DATA :: fread(const char* fname) //텍스트 읽기
      return -1;
    }
 }
-bool PR1_DATA :: table_fwrite(const char *fname) //TABLE 텍스트 쓰기
-{
-  FILE *fp;
-  if(fp = fopen( fname, "w"))
-  {
-    for(int i = 0 ; i < this->t_column ; i++)
-    {
-      for(int j = 0 ; j < this->t_row ; j++)
-      {
-        fprintf(fp,"%18.15f ",this->t_table[i * this->t_row + j]);
-      }
-      fprintf(fp,"\n");
-    }
-    fclose(fp);
-    return 1;
-  }
-  else
-  {
-    cout<<"fail to table write"<<endl;
-    return -1;
-  }
 
-}
 bool PR1_DATA :: fwrite(const char *fname) //텍스트 쓰기
 {
   FILE *fp;
@@ -374,7 +266,6 @@ PR1_DATA& PR1_DATA :: operator=(const PR1_DATA &other) //대입연산자
     }
   }
 
-  this->table_init();
 
   return *this;
 
@@ -385,9 +276,6 @@ PR1_DATA :: PR1_DATA()
   this->row = 0;
   this->column = 0;
   this->data = NULL;
-  this->t_row = 0;
-  this->t_column = 0;
-  this->t_table = NULL;
 
 }
 

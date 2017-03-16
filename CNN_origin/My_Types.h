@@ -11,14 +11,9 @@ class PR1_DATA{
     int row;
     int column;
 
-    double *t_table;
-    int t_row;
-    int t_column;
-
-    void table_make();
     void Swap(double arr[], int idx1,int idx2);
-    int Partition(double arr[], int left, int right);
-    void QuickSort(double arr[], int left, int right);
+    int Partition(double arr[], int left, int right, int x);
+    void QuickSort(double arr[], int left, int right,int x);
 
   public:
 
@@ -34,16 +29,10 @@ class PR1_DATA{
 
     const int get_row() {return row;};
     const int get_column() {return column;};
-
-    void table_init(); //table값을 초기화
-    void table_insert(int y, double value);
-    void table_ascending();
-    double get_table(int y,int x);
-    double table(int ordered_y, int x);
-    void table_print();
+    double* get_line(int y) {return &data[y*this->row];};
+    void ascending(int x);
 
     bool fread(const char *fname); //텍스트 읽기
-    bool table_fwrite(const char *fname); //table 텍스트 쓰기
     bool fwrite(const char *fname); //텍스트 쓰기
 
     const double&  operator()(int y) const { return this->data[y]; };
