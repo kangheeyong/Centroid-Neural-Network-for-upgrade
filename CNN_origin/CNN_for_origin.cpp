@@ -1,7 +1,17 @@
 #include "CNN_for_origin.h"
 #include <iostream>
+#include <stdlib.h>
+#include <stdio.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 using namespace std;
+
+
+void CNN_origin :: init(const char* name)
+{
+  sprintf(this->name,"%s",name);
+}
 
 void CNN_origin :: read_input(const char* fname)
 {
@@ -18,6 +28,42 @@ void CNN_origin :: read_setting(int cluster)
 
 void CNN_origin :: write_all_data(const char* fname)
 {
+  char buff[1024];
+
+  mkdir(fname,0755);
+  sprintf(buff,"%s/weight",fname);
+  mkdir(buff,0755);
+  sprintf(buff,"%s/weight_table",fname);
+  mkdir(buff,0755);
+
+  sprintf(buff,"%s/weight/weight",fname);
+  q_weight.lwrite(buff);
+
+  sprintf(buff,"%s/weight_table/weight_table",fname);
+  q_weight_table.lwrite(buff);
+
+  sprintf(buff,"%s/errors.txt",fname);
+  errors.fwrite(buff);
+ 
+  sprintf(buff,"%s/weight.txt",fname);
+  weight.fwrite(buff);
+
+  sprintf(buff,"%s/setting.txt",fname);
+  setting.fwrite(buff);
+
+  sprintf(buff,"%s/origin.txt",fname);
+  origin.fwrite(buff);
+
+
+
+
+//  input.print();
+  
+ // this->weight_table.print();
+//  this->status(name);
+  //errors.print();
+  //q_weight.lwrite("weight");
+  //q_weight_table.lwrite("weight_table");
 
 }
 void CNN_origin :: write_weight(const char* fname)
@@ -44,7 +90,7 @@ void CNN_origin :: status(char *name)
   cout<<"MSE : "<<MSE<<endl;
   cout<<"cluster : "<<cluster<<endl;
   cout<<"--------- weight --------"<<endl;
-  this->weight.print();
+  this->weight.print(); 
 }
 void CNN_origin ::  first_init() //전체 평균 구하기
 {
@@ -102,7 +148,7 @@ int CNN_origin ::  pre_proccess(int cur_c)//원본데이터에서 실제 쓸데�
 {
   input.suffle(1);
   table.suffle(1);
-  return data_set;
+  return data_set;//*cur_c/cluster;
 }  
 int CNN_origin ::  search_winner(double *arr,PR1_DATA *w)// 반환값은 winner weight number
 {
@@ -195,12 +241,7 @@ void CNN_origin ::  post_proccess()
     }
   }
 
-
-  input.print();
-  
-  this->weight_table.print();
-  this->status("cnn");
-  errors.print();
+  this->status(name);
 }
 
 
@@ -209,7 +250,6 @@ void CNN_origin :: learning()
   this->first_init();
   this->second_init();
 
-  weight.print();
 
   while(1){
     int currunt_winner;
@@ -217,7 +257,8 @@ void CNN_origin :: learning()
 
     iteration_set = this->pre_proccess(cur_cluster);
     do{
-
+      q_weight<<weight;
+      q_weight_table<<weight_table;
       for(int y = 0 ; y < cluster;y++ )  weight_table(y,1) = 0.0;
       epoch++;
       trade = 0;
@@ -238,15 +279,28 @@ void CNN_origin :: learning()
       t_errors(epoch-1,3) = trade;
       t_errors(epoch-1,4) = iteration_set;
 
-
+      if(trade < trade_standard && cur_cluster != cluster) break;
     }while(trade != 0);
+    
+    system("clear");
+    cout<<"----- "<<name<<" -----"<<endl;
+    cout<<"percent : "<<100*cur_cluster/cluster<<"%"<<endl;
+    cout<<"cluster : "<<cur_cluster<<endl;
+    cout<<"epoch : "<<epoch<<endl;
+    cout<<"------------"<<endl;
 
     if(cluster == cur_cluster) break;
+
     before_cluster = cur_cluster;
     cur_cluster = this->cluster_inclease_method(before_cluster);
+    
     this->cluster_increase(before_cluster, cur_cluster);
   }
-
+  setting.init(4);
+  setting(0) = epoch;
+  setting(1) = MSE;
+  setting(2) = cluster;
+  //setting(3) = ;
   this->post_proccess();
 
   
@@ -265,12 +319,10 @@ CNN_origin :: CNN_origin()
     cur_cluster = 2;
     before_cluster = 0;
     trade = 0;
+    trade_standard = 0;
     iteration_set = 0;
     data_dimension = 0;
     data_set = 0;
-
-
-
 }
 
 CNN_origin :: ~CNN_origin()

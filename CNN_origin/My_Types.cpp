@@ -326,11 +326,11 @@ PR1_QUEUE& PR1_QUEUE :: operator>>(Data &data)
 void PR1_QUEUE :: lwrite(const char *lname)
 {
   char buff[100];
-  int i = 0;
+  int i = 100000;
   Data  temp;
   while(!this->IsEmpty())
   {
-    sprintf(buff,"%s_%d.txt",lname,i++);
+    sprintf(buff,"%s%d.txt",lname,i++);
     *this>>temp;
     temp.fwrite(buff);
   }

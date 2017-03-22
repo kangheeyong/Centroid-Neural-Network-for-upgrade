@@ -11,6 +11,7 @@ class CNN_origin
 {
   private :
     PR1_DATA t_errors;
+    char name[100];
   protected :
 
     PR1_DATA origin; 
@@ -19,9 +20,10 @@ class CNN_origin
 
     PR1_DATA center;
     PR1_DATA weight;
-    PR1_DATA weight_table; //weight num, sse, n;
+    PR1_DATA weight_table; //weight num, SSE, n;
     PR1_DATA table; //어떤 기준, index, cluster 
     PR1_QUEUE q_weight; 
+    PR1_QUEUE q_weight_table;
 
     PR1_DATA errors; //epoch마다 MSE, trade, cluster num, 1-interation data , 1-iteration time
     PR1_DATA setting;
@@ -33,6 +35,7 @@ class CNN_origin
     int before_cluster;
 
     int trade;
+    int trade_standard; // 루저 기준
     int iteration_set;
     int data_dimension;
     int data_set;
@@ -50,7 +53,7 @@ class CNN_origin
     virtual void post_proccess();
 
   public :
-
+    void init(const char *name);
     void read_input(const char* fname);
     void read_weight(const char *fname);
     void read_setting(int cluster);
