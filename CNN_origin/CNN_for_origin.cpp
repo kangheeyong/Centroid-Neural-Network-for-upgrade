@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <time.h>
+
 
 using namespace std;
 
@@ -89,6 +91,7 @@ void CNN_origin :: status(char *name)
   cout<<"epoch : "<<epoch<<endl;
   cout<<"MSE : "<<MSE<<endl;
   cout<<"cluster : "<<cluster<<endl;
+  cout<<"total time : "<<total_time<<"s"<<endl;
   cout<<"--------- weight --------"<<endl;
   this->weight.print(); 
 }
@@ -247,16 +250,24 @@ void CNN_origin ::  post_proccess()
 
 void CNN_origin :: learning()
 {
+  clock_t before_time,now_time;
+
+  time_t timer;
+
+  timer = time(NULL); // 현재 시각을 초 단위로 얻기
+
+
   this->first_init();
   this->second_init();
 
-
+  
   while(1){
     int currunt_winner;
     int before_winner;
 
     iteration_set = this->pre_proccess(cur_cluster);
     do{
+      before_time = clock();
       q_weight<<weight;
       q_weight_table<<weight_table;
       for(int y = 0 ; y < cluster;y++ )  weight_table(y,1) = 0.0;
@@ -273,12 +284,16 @@ void CNN_origin :: learning()
       MSE = 0.0;
       for(int c = 0 ; c < cur_cluster ; c++) MSE = MSE + weight_table(c,1);
 
+
+      now_time = clock();
+      epoch_time = (double)(now_time - before_time) / CLOCKS_PER_SEC;
+
       t_errors(epoch-1,0) = epoch;
       t_errors(epoch-1,1) = MSE;
       t_errors(epoch-1,2) = cur_cluster;
       t_errors(epoch-1,3) = trade;
       t_errors(epoch-1,4) = iteration_set;
-
+      t_errors(epoch-1,5) = epoch_time;
       if(trade < trade_standard && cur_cluster != cluster) break;
     }while(trade != 0);
     
@@ -287,6 +302,7 @@ void CNN_origin :: learning()
     cout<<"percent : "<<100*cur_cluster/cluster<<"%"<<endl;
     cout<<"cluster : "<<cur_cluster<<endl;
     cout<<"epoch : "<<epoch<<endl;
+    cout<<"time : "<<time(NULL)-timer<<"s"<<endl;
     cout<<"------------"<<endl;
 
     if(cluster == cur_cluster) break;
@@ -296,11 +312,14 @@ void CNN_origin :: learning()
     
     this->cluster_increase(before_cluster, cur_cluster);
   }
+  total_time = (double)(time(NULL) - timer); // 현재 시각을 초 단위로 얻기
+
+
   setting.init(4);
   setting(0) = epoch;
   setting(1) = MSE;
   setting(2) = cluster;
-  //setting(3) = ;
+  setting(3) = total_time;
   this->post_proccess();
 
   
@@ -323,6 +342,7 @@ CNN_origin :: CNN_origin()
     iteration_set = 0;
     data_dimension = 0;
     data_set = 0;
+    total_time = 0.0;
 }
 
 CNN_origin :: ~CNN_origin()

@@ -33,7 +33,9 @@ class CNN_origin
     int cluster;
     int cur_cluster;
     int before_cluster;
-
+    
+    double epoch_time;
+    double total_time;
     int trade;
     int trade_standard; // 루저 기준
     int iteration_set;
