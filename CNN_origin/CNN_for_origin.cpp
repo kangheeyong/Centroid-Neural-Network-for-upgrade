@@ -56,6 +56,12 @@ void CNN_origin :: write_all_data(const char* fname)
   sprintf(buff,"%s/origin.txt",fname);
   origin.fwrite(buff);
 
+  sprintf(buff,"%s/result.txt",fname);
+  result.fwrite(buff);
+
+  sprintf(buff,"%s/cluster_errors.txt",fname);
+  cluster_errors.fwrite(buff);
+
 
 
 
@@ -79,6 +85,10 @@ void CNN_origin :: write_result(const char *fname)
 void CNN_origin :: write_errors(const char *fname)
 {
   this->errors.fwrite(fname);
+}
+void CNN_origin :: write_cluster_errors(const char *fname)
+{
+  this->cluster_errors.fwrite(fname);
 }
 void CNN_origin :: write_setting(const char *fname)
 {
@@ -127,6 +137,7 @@ void CNN_origin ::  first_init() //전체 평균 구하기
     weight_table(y,0) = y;
   }
   t_errors.init(MAX_EPOCH,6);
+  t_c_errors.init(MAX_EPOCH,5);
 }
 void CNN_origin ::  second_init()
 {
@@ -243,7 +254,26 @@ void CNN_origin ::  post_proccess()
       errors(i,j) = t_errors(i,j);
     }
   }
+  cluster_errors.init(c_increase,5);
+   for(int i = 0 ; i < c_increase ; i++)
+  {
+    for(int j = 0 ; j < 5 ; j++)
+    {
+      cluster_errors(i,j) = t_c_errors(i,j);
+    }
+  }
+  
 
+  result.init(data_set,data_dimension+1);
+  for(int y = 0 ; y < data_set ; y++)
+  {
+    for(int x = 0 ; x < data_dimension ; x++)
+    {
+      result(y,x) = input(y,x);
+    }
+    result(y,data_dimension) = table(y);
+  }
+ 
   this->status(name);
 }
 
@@ -251,11 +281,13 @@ void CNN_origin ::  post_proccess()
 void CNN_origin :: learning()
 {
   clock_t before_time,now_time;
-
   time_t timer;
-
+  int before_epoch = 0;
+  int average_loser = 0;
+  double average_time = 0.0;
   timer = time(NULL); // 현재 시각을 초 단위로 얻기
 
+  c_increase = 0;
 
   this->first_init();
   this->second_init();
@@ -283,7 +315,7 @@ void CNN_origin :: learning()
       }
       MSE = 0.0;
       for(int c = 0 ; c < cur_cluster ; c++) MSE = MSE + weight_table(c,1);
-
+      MSE =MSE / iteration_set;
 
       now_time = clock();
       epoch_time = (double)(now_time - before_time) / CLOCKS_PER_SEC;
@@ -294,9 +326,20 @@ void CNN_origin :: learning()
       t_errors(epoch-1,3) = trade;
       t_errors(epoch-1,4) = iteration_set;
       t_errors(epoch-1,5) = epoch_time;
+      average_time += epoch_time;
+      average_loser += trade;
       if(trade < trade_standard && cur_cluster != cluster) break;
     }while(trade != 0);
-    
+
+    t_c_errors(c_increase,0) = cur_cluster;
+    t_c_errors(c_increase,1) = epoch - before_epoch;
+    before_epoch = epoch;
+    t_c_errors(c_increase,2) = (double)average_loser/t_c_errors(c_increase,1);
+    average_loser = 0;
+    t_c_errors(c_increase,3) = iteration_set;
+    t_c_errors(c_increase++,4) = average_time;
+    average_time = 0.0;
+
     system("clear");
     cout<<"----- "<<name<<" -----"<<endl;
     cout<<"percent : "<<100*cur_cluster/cluster<<"%"<<endl;

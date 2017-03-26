@@ -11,7 +11,10 @@ class CNN_origin
 {
   private :
     PR1_DATA t_errors;
+    PR1_DATA t_c_errors;
     char name[100];
+    int c_increase;
+
   protected :
 
     PR1_DATA origin; 
@@ -26,6 +29,7 @@ class CNN_origin
     PR1_QUEUE q_weight_table;
 
     PR1_DATA errors; //epoch마다 MSE, trade, cluster num, 1-interation data , 1-iteration time
+    PR1_DATA cluster_errors;//cluster 변화마다 iteration_set, epoch, aver_loser, cluste_time
     PR1_DATA setting;
     
     int epoch;
@@ -67,7 +71,7 @@ class CNN_origin
     void write_result(const char *fname);
     void write_errors(const char *fname);
     void write_setting(const char *fname);
-
+    void write_cluster_errors(const char *fname);
     void learning();
     void testing();
 
