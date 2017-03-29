@@ -53,7 +53,7 @@ class CNN_origin
     int search_winner(double *arr,PR1_DATA *w);// 반환값은 winner weight number
     int calculate_winner_loser(double *arr,PR1_DATA *w,int winner, int loser);//반환값은 
     
-    int cluster_increase(int before, int after);
+    virtual int cluster_increase(int before, int after);
     virtual int cluster_inclease_method(int before);
     
     virtual void post_proccess();

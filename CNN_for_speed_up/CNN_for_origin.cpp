@@ -227,7 +227,13 @@ int CNN_origin ::  cluster_increase(int before, int after)
     }
   }
   weight = temp;
-  temp = weight_table;  
+  temp = weight_table; 
+
+  for(int y = 0 ; y < temp.get_column() ; y++)
+  {
+
+  }
+
   temp.ascending(1);
 
   PR1_DATA small;

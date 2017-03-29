@@ -37,6 +37,7 @@ class CNN_FIBONACCI : public CNN_origin
    int fibo_before; 
   protected :
    int cluster_inclease_method(int before);
+   int cluster_increase(int before, int after);
 
   public :
    CNN_FIBONACCI();

@@ -67,7 +67,43 @@ CNN_FIBONACCI :: CNN_FIBONACCI()
 {
   fibo_before = 1;
 }
+int CNN_FIBONACCI ::  cluster_increase(int before, int after)
+{
+  int gap = after - before;
+  PR1_DATA temp;
+  
+  temp.init(after,data_dimension);
+  
+  for(int y = 0 ; y < before ; y ++)
+  {
+    for(int x = 0 ; x < data_dimension ; x++)
+    {
+      temp(y,x) = weight(y,x);
+    }
+  }
+  weight = temp;
+  temp = weight_table;  
+ /* for(int y = 0 ; y < temp.get_row() ; y++)
+  {
+    if(temp(y,2) == 0) break;
+    temp(y,1) = temp(y,1)/temp(y,2);
+  }*/
+  temp.ascending(1);
 
+  PR1_DATA small;
+  small.init(data_dimension);
+  small.random(-0.01,0.01);
+  int i = 0;
+  for(int y = cluster-gap ; y < cluster ; y++, i++)
+  {
+    for(int x = 0 ; x < data_dimension ; x++)
+    {
+      weight(before + i,x) = weight(temp(y,0),x) + small(x); 
+    }
+  }
+
+
+}
 
 int CNN_FIBONACCI ::  cluster_inclease_method(int before)
 {
