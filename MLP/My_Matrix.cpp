@@ -231,6 +231,7 @@ My_Matrix operator*(const My_Matrix &T1, const My_Matrix &T2)
   {
     for(int x = 0 ; x < temp.row ; x++)
     {
+      temp(y,x) = 0;
       for(int i = 0 ; i < T1.row ; i++)
       {
         temp(y,x) = temp(y,x) + T1(y,i)*T2(i,x);
@@ -422,9 +423,18 @@ My_Matrix& My_Matrix :: operator=(const My_Matrix &other) //대입연산자
 My_Matrix My_Matrix :: transpose()
 {
   My_Matrix temp;
-  temp = *this;
   temp.row = this->column;
   temp.column = this->row;
+  temp.init(temp.column,temp.row);
+  for(int i = 0 ; i < this->column ; i++)
+  {
+    for(int j = 0 ; j < this->row ; j++)
+    {
+      temp.data[j*temp.row + i] = this->data[i*this->row + j];
+    }
+  }
+
+
   return temp;
 }
 
@@ -439,5 +449,8 @@ My_Matrix :: My_Matrix()
 
 My_Matrix :: ~My_Matrix()
 {
-  if(this->data != NULL) delete data;
+  if(this->data != NULL)
+  {
+    delete data;
+  }
 }

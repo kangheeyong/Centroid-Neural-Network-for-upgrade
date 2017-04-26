@@ -5,31 +5,33 @@
 
 class My_Matrix{
 
-  // matlab 연산과 동일한 결과, 에러 검출은 안함
-  friend My_Matrix operator+(const My_Matrix &T1, const My_Matrix &T2);// T1 + T2
-  friend My_Matrix operator+(const My_Matrix &T, const double num);// T + num
-  friend My_Matrix operator+(const double num, const My_Matrix &T);// num + T
+  private :
+    // matlab 연산과 동일한 결과, 에러 검출은 안함
+    friend My_Matrix operator+(const My_Matrix &T1, const My_Matrix &T2);// T1 + T2
+    friend My_Matrix operator+(const My_Matrix &T, const double num);// T + num
+    friend My_Matrix operator+(const double num, const My_Matrix &T);// num + T
 
-  friend My_Matrix operator-(const My_Matrix &T1, const My_Matrix &T2);// T1 - T2
-  friend My_Matrix operator-(const My_Matrix &T, const double num);// T - num
-  friend My_Matrix operator-(const double num, const My_Matrix &T);// num - T
+    friend My_Matrix operator-(const My_Matrix &T1, const My_Matrix &T2);// T1 - T2
+    friend My_Matrix operator-(const My_Matrix &T, const double num);// T - num
+    friend My_Matrix operator-(const double num, const My_Matrix &T);// num - T
 
-  friend My_Matrix operator*(const My_Matrix &T1, const My_Matrix &T2);// T1 * T2
-  friend My_Matrix operator*(const My_Matrix &T, const double num);// T * num
-  friend My_Matrix operator*(const double num, const My_Matrix &T);// num * T
+    friend My_Matrix operator*(const My_Matrix &T1, const My_Matrix &T2);// T1 * T2
+    friend My_Matrix operator*(const My_Matrix &T, const double num);// T * num
+    friend My_Matrix operator*(const double num, const My_Matrix &T);// num * T
 
-  friend My_Matrix mul(const My_Matrix &T1, const My_Matrix &T2);// T1.*T2
- 
+    friend My_Matrix mul(const My_Matrix &T1, const My_Matrix &T2);// T1.*T2
 
-  protected :
     double *data;
     int row, column;
 
+  protected :
   public :
 
     void init(int y, int x);
     void print(); 
 
+    int get_row() const { return this->row; };
+    int get_column() const { return this->column; };
     void gaussian(double average, double stdev);// 가우시안 분포로 변수 생성
 
     My_Matrix transpose();
