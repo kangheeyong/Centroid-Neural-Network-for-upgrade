@@ -26,18 +26,26 @@ class nueral_layer{
     ~nueral_layer();
 };
 
+
 class MLP{
   private :
 
     int total_layers; 
-    int mini_batch;
+   
   protected :
+    double alpha; // learning_gain
+    double ramda; // decay_para
+    int mini_batch;
+
     nueral_layer *head;
     nueral_layer *tail;
     nueral_layer *cur;
     nueral_layer& prev() {return *(cur->prev);};
     nueral_layer& current() {return *cur;};
     nueral_layer& next() {return *(cur->next);};
+
+    My_Matrix y;
+    double W;
 
     void Lfirst();
     void Llast();
@@ -51,21 +59,20 @@ class MLP{
   public :
 
     My_Matrix& set_intput() { return head->z; };
-    //  virtual MLP set_output(int y, int x);
+    My_Matrix& set_output() { return y; };
     void  check();
     void network_connect();
     
-    //void mini_batch(int num);
+    void batch_size(int num) { mini_batch = num; };
 
-    //  double get_cost_function()
-    void  init_gaussian(double average, double stdev);
-    //  virtual MLP learning_gain(double alpha);
-    //  virtual MLP decay_para(double ramda)
+    double get_cost_function();
+    void init_gaussian(double average, double stdev);
+    void learning_gain(double alpha) {this->alpha = alpha; };
+    void decay_para(double ramda) { this->ramda = ramda; };
     void add_layer(int nuerals);
     void del_layer(int index);
     void activation();
-
-    //  virtual MLP back_propagation();
+    void back_propagation();
 
     MLP();
     ~MLP();

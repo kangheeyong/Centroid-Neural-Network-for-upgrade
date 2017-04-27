@@ -9,9 +9,8 @@ using namespace std;
 
 int main()
 {
-  My_Matrix input;
-  srand(1);
-  cout<<"hello world"<<endl;
+
+  My_Matrix input, target;
   MLP a;
 
   input.init(4,2);
@@ -25,24 +24,41 @@ int main()
   input(3,0) = 1;
   input(3,1) = 1;
 
+  target.init(4,1);
+  
+  target(0,0) = 1;
+  target(1,0) = 0;
+  target(2,0) = 0;
+  target(3,0) = 1;
+
+
   a.add_layer(2);
   a.add_layer(5);
   a.add_layer(2);
   a.add_layer(1);
 
   a.network_connect();
-  a.init_gaussian(0, 0.1);
   
+  srand(1);
+  a.init_gaussian(0, 1);
+
+  a.batch_size(4);
+  a.learning_gain(0.5);
+  a.decay_para(0.000001);
+
+
   a.set_intput() = input;
-  
-  a.activation();
+  a.set_output() = target;
+  for(int i = 0 ; i < 5000 ; i++)
+  {
+    a.activation();
+    //a.check();
+    cout<<a.get_cost_function()<<endl;
+
+    a.back_propagation();
+    // a.check();
+  }
   a.check();
-
-
-  cout<<endl;
-
-
-
 
   return 0;
 }

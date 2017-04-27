@@ -353,6 +353,7 @@ void My_Matrix :: init(int y, int x)
   this->data = new double[x*y];
   this->row = x;
   this->column = y;
+  for(int i = 0 ; i < x*y ; i ++)this->data[i] = 0.0;
 
 }
 

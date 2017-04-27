@@ -145,13 +145,25 @@ void MLP :: check()
   Lfirst();
   do
   {
+    cout<<"--------------------------------"<<endl;
     cout<<"index : "<<current().index<<", nuerals : "<<current().nuerals<<", type : " <<current().type<<endl;
+    cout<<"------------- a ----------------"<<endl;
     current().a.print();
+    cout<<"------------- z ----------------"<<endl;
     current().z.print();
-
+    cout<<"------------- w ----------------"<<endl;
     current().w.print();
+    cout<<"------------- b ----------------"<<endl;
     current().b.print();
+    cout<<"------------- delta ----------------"<<endl;
+    current().delta.print();
+    cout<<"--------------------------------"<<endl;
+
   } while(Lnext());
+  cout<<"------------- y  ----------------"<<endl;
+  y.print();
+cout<<"w_sum : "<<W<<endl;
+ 
 }
 
 void MLP :: network_connect()
@@ -197,22 +209,59 @@ My_Matrix sigmoid(const My_Matrix &T)
 
 void MLP :: activation()
 {
- Lfirst();
+  Lfirst();
+  W = 0;
   do
   {
     if(&next() != NULL)
     {
       next().a = (current().z * current().w.transpose()) + current().b;
       next().z = sigmoid(next().a);
+
+      W = W + mul(current().w,current().w).sum();
     }
   } while(Lnext());
 }
+double MLP :: get_cost_function()
+{
+  Llast();
 
+  return mul(y - current().z, y - current().z).sum()/(2*mini_batch) + ramda*W*0.5;
+}
+void MLP :: back_propagation()
+{
+  Llast();
+  double mb = 1.0/mini_batch;
+  My_Matrix delta_w, delta_b;
+  current().delta = -1*mul(y-current().z, mul(current().z,1-current().z));
+  do
+  {
+    if(&(prev()) != NULL)
+    {
+       if(&prev() != head) prev().delta = mul(current().delta * prev().w, mul(prev().z,1-prev().z));
+       delta_w.init(current().nuerals,prev().nuerals);
+       delta_b.init(1,current().nuerals);
+
+       for(int i = 0 ; i < mini_batch ; i++)
+       {
+         delta_w = delta_w + current().delta.vector(i,MY_ALL).transpose() * prev().z.vector(i,MY_ALL);
+         delta_b = delta_b + current().delta.vector(i,MY_ALL);
+       }
+       prev().w = prev().w - alpha*(delta_w*mb + ramda*prev().w);
+       prev().b = prev().b - alpha*delta_b*mb;
+
+     
+    }
+  } while(Lprev());
+
+}
 
 MLP :: MLP()
 {
   total_layers = 0;
   mini_batch = 1;
+  alpha = 0.1; // learning_gain
+  ramda = 0.0; // decay_para
 
   head = NULL;
   tail = NULL;
