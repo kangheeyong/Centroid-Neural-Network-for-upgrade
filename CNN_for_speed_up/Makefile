@@ -16,6 +16,14 @@ OBJ_SORT = sort.o My_Types.o CNN_for_origin.o CNN_for_speed_up.o
 TARGET_FIBO = CNN_for_speed_fibonacci
 OBJ_FIBO = fibo.o My_Types.o CNN_for_origin.o CNN_for_speed_up.o
 
+TARGET_LOSER = CNN_for_speed_loser
+OBJ_LOSER = loser.o My_Types.o CNN_for_origin.o CNN_for_speed_up.o
+
+TARGET_SEPERATE = SCNN
+OBJ_SEPERATE = scnn.o My_Types.o CNN_for_origin.o CNN_for_speed_up.o
+
+
+
 
 
 $(TARGET) : $(OBJECTS)
@@ -32,6 +40,13 @@ $(TARGET_SORT) : $(OBJ_SORT)
 
 $(TARGET_FIBO) : $(OBJ_FIBO)
 				$(CXX) -g $(FLAGS) $(TARGET_FIBO) $(OBJ_FIBO)
+
+$(TARGET_LOSER) : $(OBJ_LOSER)
+				$(CXX) -g $(FLAGS) $(TARGET_LOSER) $(OBJ_LOSER)
+
+$(TARGET_SEPERATE) : $(OBJ_SEPERATE)
+				$(CXX) -g $(FLAGS) $(TARGET_SEPERATE) $(OBJ_SEPERATE)
+
 
 
 

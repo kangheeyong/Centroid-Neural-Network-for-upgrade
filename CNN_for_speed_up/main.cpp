@@ -12,8 +12,8 @@ int main(int argc, char **argv)
     printf("Usage : %s [cluster number] [input text] [result]\n",argv[0]);
     return 0;
   }
-  CNN_origin *a = new CNN_RANDOM_INCREASE;
-  a->init("CNN for speed up : random increase");
+  CNN_origin *a = new CNN_origin;
+  a->init("CNN for speed up : origin");
   a->read_input(argv[2]);
   a->read_setting(atoi(argv[1]));
   a->learning();
