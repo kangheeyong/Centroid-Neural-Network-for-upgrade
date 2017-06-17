@@ -73,6 +73,7 @@ class CNN_origin
     void write_setting(const char *fname);
     void write_cluster_errors(const char *fname);
     void learning();
+    void learning_continue(); 
     void testing();
 
     CNN_origin();

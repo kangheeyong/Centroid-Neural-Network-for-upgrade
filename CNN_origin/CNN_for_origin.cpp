@@ -5,7 +5,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <time.h>
-
+#include <math.h>
 
 using namespace std;
 
@@ -124,7 +124,7 @@ void CNN_origin ::  first_init() //전체 평균 구하기
   weight.init(cur_cluster,data_dimension);
   PR1_DATA small;
   small.init(data_dimension);
-  small.random(-0.001 ,0.001);
+  small.random(-0.1 ,0.1);
 
   for(int x = 0 ; x < data_dimension ; x++)
   {
@@ -137,7 +137,7 @@ void CNN_origin ::  first_init() //전체 평균 구하기
     weight_table(y,0) = y;
   }
   t_errors.init(MAX_EPOCH,6);
-  t_c_errors.init(MAX_EPOCH,5);
+  t_c_errors.init(MAX_EPOCH,6);
 }
 void CNN_origin ::  second_init()
 {
@@ -232,7 +232,7 @@ int CNN_origin ::  cluster_increase(int before, int after)
 
   PR1_DATA small;
   small.init(data_dimension);
-  small.random(-0.01,0.01);
+  small.random(-0.0001,0.0001);
   int i = 0;
   for(int y = cluster-gap ; y < cluster ; y++, i++)
   {
@@ -254,10 +254,10 @@ void CNN_origin ::  post_proccess()
       errors(i,j) = t_errors(i,j);
     }
   }
-  cluster_errors.init(c_increase,5);
+  cluster_errors.init(c_increase,6);
    for(int i = 0 ; i < c_increase ; i++)
   {
-    for(int j = 0 ; j < 5 ; j++)
+    for(int j = 0 ; j < 6 ; j++)
     {
       cluster_errors(i,j) = t_c_errors(i,j);
     }
@@ -286,7 +286,7 @@ void CNN_origin :: learning()
   int average_loser = 0;
   double average_time = 0.0;
   timer = time(NULL); // 현재 시각을 초 단위로 얻기
-
+  double entropy = 0.0;
   c_increase = 0;
 
   this->first_init();
@@ -337,7 +337,16 @@ void CNN_origin :: learning()
     t_c_errors(c_increase,2) = (double)average_loser/t_c_errors(c_increase,1);
     average_loser = 0;
     t_c_errors(c_increase,3) = iteration_set;
-    t_c_errors(c_increase++,4) = average_time;
+
+
+    for(int i = 0 ; i < cur_cluster ;i++)
+    {
+      if(weight_table(i,2) > 0.0000000001)
+        entropy = entropy - weight_table(i,2)/iteration_set*log(weight_table(i,2)/iteration_set)/log(cur_cluster);
+    }
+    t_c_errors(c_increase,4) = entropy;
+    entropy = 0.0;
+    t_c_errors(c_increase++,5) = average_time;
     average_time = 0.0;
 
     system("clear");
@@ -367,6 +376,124 @@ void CNN_origin :: learning()
 
   
 }
+
+void CNN_origin :: learning_continue()
+{
+  clock_t before_time,now_time;
+  time_t timer;
+  int before_epoch = 0;
+  int average_loser = 0;
+  double average_time = 0.0;
+  timer = time(NULL); // 현재 시각을 초 단위로 얻기
+  double entropy = 0.0;
+  c_increase = 0;
+
+//  this->first_init();
+  data_dimension = origin.get_row();
+  data_set = origin.get_column();
+  cluster = weight.get_column();
+  cur_cluster = cluster;
+
+
+
+  weight_table.init(cluster,3);
+  for(int y = 0 ; y < cluster ; y++)
+  {
+    weight_table(y,0) = y;
+  }
+  t_errors.init(MAX_EPOCH,6);
+  t_c_errors.init(MAX_EPOCH,6);
+
+//
+  this->second_init();
+
+  
+  while(1){
+    int currunt_winner;
+    int before_winner;
+
+    iteration_set = data_set;
+    do{
+      before_time = clock();
+      q_weight<<weight;
+      q_weight_table<<weight_table;
+      for(int y = 0 ; y < cluster;y++ )  weight_table(y,1) = 0.0;
+      epoch++;
+      trade = 0;
+
+      for(int y = 0 ; y < iteration_set ;y++)
+      {
+        currunt_winner = this->search_winner(input.get_line(y),&weight);
+        before_winner = table(y);
+        table(y) = currunt_winner;
+        trade = trade + this->calculate_winner_loser(input.get_line(y),&weight,currunt_winner,before_winner);
+      }
+      MSE = 0.0;
+      for(int c = 0 ; c < cur_cluster ; c++) MSE = MSE + weight_table(c,1);
+      MSE =MSE / iteration_set;
+
+      now_time = clock();
+      epoch_time = (double)(now_time - before_time) / CLOCKS_PER_SEC;
+
+      t_errors(epoch-1,0) = epoch;
+      t_errors(epoch-1,1) = MSE;
+      t_errors(epoch-1,2) = cur_cluster;
+      t_errors(epoch-1,3) = trade;
+      t_errors(epoch-1,4) = iteration_set;
+      t_errors(epoch-1,5) = epoch_time;
+      average_time += epoch_time;
+      average_loser += trade;
+      if(trade < trade_standard && cur_cluster != cluster) break;
+    }while(trade != 0);
+
+    t_c_errors(c_increase,0) = cur_cluster;
+    t_c_errors(c_increase,1) = epoch - before_epoch;
+    before_epoch = epoch;
+    t_c_errors(c_increase,2) = (double)average_loser/t_c_errors(c_increase,1);
+    average_loser = 0;
+    t_c_errors(c_increase,3) = iteration_set;
+
+
+    for(int i = 0 ; i < cur_cluster ;i++)
+    {
+      if(weight_table(i,2) > 0.0000000001)
+        entropy = entropy - weight_table(i,2)/iteration_set*log(weight_table(i,2)/iteration_set)/log(cur_cluster);
+    }
+    t_c_errors(c_increase,4) = entropy;
+    entropy = 0.0;
+    t_c_errors(c_increase++,5) = average_time;
+    average_time = 0.0;
+
+    system("clear");
+    cout<<"----- "<<name<<" -----"<<endl;
+    cout<<"percent : "<<100*cur_cluster/cluster<<"%"<<endl;
+    cout<<"cluster : "<<cur_cluster<<endl;
+    cout<<"epoch : "<<epoch<<endl;
+    cout<<"time : "<<time(NULL)-timer<<"s"<<endl;
+    cout<<"------------"<<endl;
+
+    if(cluster == cur_cluster) break;
+
+    before_cluster = cur_cluster;
+    cur_cluster = this->cluster_inclease_method(before_cluster);
+    
+    this->cluster_increase(before_cluster, cur_cluster);
+  }
+  total_time = (double)(time(NULL) - timer); // 현재 시각을 초 단위로 얻기
+
+
+  setting.init(4);
+  setting(0) = epoch;
+  setting(1) = MSE;
+  setting(2) = cluster;
+  setting(3) = total_time;
+  this->post_proccess();
+
+  
+}
+
+
+
 void CNN_origin :: testing()
 {
 
