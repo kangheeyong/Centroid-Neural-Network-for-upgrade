@@ -49,9 +49,9 @@ sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
 
-img = cv2.imread("image/city0.jpg",0)
+img = cv2.imread("image/London.jpg",0)
 edges = cv2.Canny(img,100,200)
-dst = cv2.imread("image/city0.jpg",0)
+dst = cv2.imread("image/London.jpg",0)
 
 
 height, width =img.shape
