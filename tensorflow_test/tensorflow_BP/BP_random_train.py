@@ -5,8 +5,10 @@ import numpy as np
 
 
 
-input_data = np.array([[0,0],[0,1],[1,0],[1,1]])
-output_data = np.array([[1],[0],[0],[1]])
+#input_data = np.array([[0,0],[0,1],[1,0],[1,1]])
+#output_data = np.array([[1],[0],[0],[1]])
+input_data = [[0,0],[0,1],[1,0],[1,1]]
+output_data = [[1],[0],[0],[1]]
 mini_batch = 4
 
 my_seed = 1
@@ -52,7 +54,7 @@ sess.run(tf.global_variables_initializer())
 
 print(sess.run([W1,b1,W2,b2,W3,b3]))
 print('--------------')
-for i in range(1) :
+for i in range(5000) :
     _ , e = sess.run([BP, cost_function],feed_dict={x : input_data, t : output_data})
 
     print(e)
